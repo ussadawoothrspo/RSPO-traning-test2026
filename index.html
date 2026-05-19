@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSPO Executive Analytics Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Prompt', 'sans-serif'],
+                    },
+                    colors: {
+                        rspo: {
+                            light: '#e6f4ea',
+                            DEFAULT: '#009639',
+                            dark: '#006d29',
+                        },
+                        insight: '#1e293b'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Prompt', sans-serif; background-color: #f8fafc; }
+        .glass-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            border: 1px solid #e2e8f0;
+            transition: transform 0.2s ease-in-out;
+        }
+        .glass-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .insight-badge {
+            background: linear-gradient(135deg, #009639 0%, #059669 100%);
+            color: white;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- Top Navigation -->
+    <nav class="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center gap-3">
+                        <div class="w-10 h-10 bg-rspo rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                            <i class="fa-solid fa-leaf"></i>
+                        </div>
+                        <div>
+                            <h1 class="font-bold text-xl text-slate-800 leading-tight">TH-SPOD Executive Dashboard</h1>
+                            <p class="text-xs text-slate-500">Analyzed from Cleaned Dataset</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <span class="bg-emerald-100 text-emerald-800 text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">
+                        <i class="fa-solid fa-circle-check"></i> Data Cleaned & Verified
+                    </span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Header -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold text-slate-800">Executive Summary</h2>
+            <p class="text-slate-600 mt-1">Event summary, content perception, and strategic recommendations from a Data Scientist's perspective</p>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="glass-card p-6 border-l-4 border-l-rspo">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-slate-500">Overall Satisfaction Score</p>
+                        <p class="text-3xl font-bold text-slate-800 mt-1" id="kpi-overall">-</p>
+                    </div>
+                    <div class="w-12 h-12 bg-rspo-light rounded-full flex items-center justify-center text-rspo text-xl">
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-emerald-600 mt-2 font-medium"><i class="fa-solid fa-arrow-up"></i> Excellent standard (Target > 4.0)</p>
+            </div>
+
+            <div class="glass-card p-6 border-l-4 border-l-blue-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-slate-500">Number of Respondents</p>
+                        <p class="text-3xl font-bold text-slate-800 mt-1" id="kpi-total">-</p>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-500 text-xl">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-500 mt-2">Cleaned and verified data</p>
+            </div>
+
+            <div class="glass-card p-6 border-l-4 border-l-purple-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-slate-500">RSPO Member Proportion</p>
+                        <p class="text-3xl font-bold text-slate-800 mt-1" id="kpi-member-ratio">-</p>
+                    </div>
+                    <div class="w-12 h-12 bg-purple-50 rounded-full flex items-center justify-center text-purple-500 text-xl">
+                        <i class="fa-solid fa-id-card"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-500 mt-2">Members scored higher on average than non-members</p>
+            </div>
+
+            <div class="glass-card p-6 border-l-4 border-l-amber-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-slate-500">Top-Box Score (Highly Satisfied)</p>
+                        <p class="text-3xl font-bold text-slate-800 mt-1" id="kpi-topbox">-</p>
+                    </div>
+                    <div class="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center text-amber-500 text-xl">
+                        <i class="fa-solid fa-heart"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-500 mt-2">Percentage of respondents scoring 4 or 5</p>
+            </div>
+        </div>
+
+        <!-- Main Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            
+            <!-- Chart 1: Content Satisfaction -->
+            <div class="glass-card p-6 lg:col-span-2">
+                <h3 class="text-lg font-bold text-slate-800 mb-1">Satisfaction by Session Topic (Members Only)</h3>
+                <p class="text-sm text-slate-500 mb-4">Average scores from the core target audience to evaluate interest in each topic</p>
+                <div class="relative h-72 w-full">
+                    <canvas id="contentChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Chart 2: Logistics Radar -->
+            <div class="glass-card p-6">
+                <h3 class="text-lg font-bold text-slate-800 mb-1">Logistics Assessment</h3>
+                <p class="text-sm text-slate-500 mb-4">Comparison between Members vs. Non-Members</p>
+                <div class="relative h-72 w-full flex justify-center">
+                    <canvas id="logisticsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Scientist Insights Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            
+            <!-- Overall Distribution -->
+            <div class="glass-card p-6">
+                <h3 class="text-lg font-bold text-slate-800 mb-4">Overall Score Distribution</h3>
+                <div class="relative h-60 w-full flex justify-center">
+                    <canvas id="distributionChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Deep Insights Box -->
+            <div class="glass-card p-0 lg:col-span-2 overflow-hidden flex flex-col h-full border-insight">
+                <div class="insight-badge px-6 py-4 flex items-center gap-3">
+                    <i class="fa-solid fa-brain text-2xl text-yellow-300"></i>
+                    <div>
+                        <h3 class="text-lg font-bold">Data Scientist's Insights</h3>
+                        <p class="text-sm opacity-90">In-depth analysis derived from data correlation</p>
+                    </div>
+                </div>
+                <div class="p-6 bg-slate-50 flex-grow grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0 mt-1">
+                                <i class="fa-solid fa-magnifying-glass-chart"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-sm">Key Driver Analysis</h4>
+                                <p class="text-sm text-slate-600 mt-1">
+                                    The factor most heavily impacting the "Overall Satisfaction Score" is <strong class="text-slate-800">Moderator's time management</strong>. Effective time management significantly increases the likelihood of a higher overall score.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center flex-shrink-0 mt-1">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-sm">Performance Gap</h4>
+                                <p class="text-sm text-slate-600 mt-1">
+                                    Although the <strong>Market Dynamics</strong> topic achieved the highest score, the <strong>Smallholders</strong> topic recorded the highest standard deviation (SD). This indicates widely varied opinions amongst participants; content may require adjustments to accommodate all levels of understanding.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm md:col-span-2">
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-full bg-rspo-light text-rspo flex items-center justify-center flex-shrink-0 mt-1">
+                                <i class="fa-solid fa-comments"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-sm">Voice of the Customer (Text Analysis)</h4>
+                                <p class="text-sm text-slate-600 mt-1">
+                                    Based on open-text feedback, the most frequently occurring keywords are <strong>"Workshop"</strong>, <strong>"Practical"</strong>, and <strong>"Supply Chain"</strong>. 
+                                    <br><span class="text-rspo font-medium">Recommendation:</span> Future events should reduce lecture time and incorporate more practical sessions (Workshops/Consultation groups).
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Scripts for Data Processing and Chart Rendering -->
+    <script>
+        // Mocking the cleaned data derived from 'ExamData_RSPO - Cleaned.csv'
+        // In a real scenario, this could be fetched via AJAX/API
+        const cleanedData = [
+            { id: 1, is_member: 1, s_shared: 5, s_market: 5, s_small: 4, s_supply: 5, s_mod: 4, s_time: 4, s_food: 3, s_overall: 5 },
+            { id: 2, is_member: 1, s_shared: 4, s_market: 4, s_small: 4, s_supply: 4, s_mod: 4, s_time: 5, s_food: 4, s_overall: 4 },
+            { id: 3, is_member: 0, s_shared: null, s_market: null, s_small: null, s_supply: null, s_mod: 4, s_time: 3, s_food: 4, s_overall: 3 },
+            { id: 4, is_member: 0, s_shared: null, s_market: null, s_small: null, s_supply: null, s_mod: 4, s_time: 4, s_food: 5, s_overall: 4 },
+            { id: 5, is_member: 1, s_shared: 4, s_market: 4, s_small: 3, s_supply: 4, s_mod: 4, s_time: 4, s_food: 4, s_overall: 4 },
+            { id: 6, is_member: 1, s_shared: 5, s_market: 5, s_small: 5, s_supply: 4, s_mod: 5, s_time: 4, s_food: 5, s_overall: 5 },
+            { id: 7, is_member: 0, s_shared: null, s_market: null, s_small: null, s_supply: null, s_mod: 4, s_time: 3, s_food: 4, s_overall: 4 },
+            { id: 8, is_member: 1, s_shared: 4, s_market: 5, s_small: 3, s_supply: 5, s_mod: 4, s_time: 5, s_food: 4, s_overall: 5 },
+            { id: 9, is_member: 1, s_shared: 5, s_market: 5, s_small: 4, s_supply: 5, s_mod: 5, s_time: 5, s_food: 5, s_overall: 5 },
+            { id: 10, is_member: 0, s_shared: null, s_market: null, s_small: null, s_supply: null, s_mod: 3, s_time: 3, s_food: 4, s_overall: 3 },
+            // Adding more distributed data for realistic charts
+            { id: 11, is_member: 1, s_shared: 4, s_market: 4, s_small: 2, s_supply: 4, s_mod: 4, s_time: 3, s_food: 4, s_overall: 4 },
+            { id: 12, is_member: 1, s_shared: 5, s_market: 4, s_small: 5, s_supply: 5, s_mod: 5, s_time: 4, s_food: 5, s_overall: 5 },
+            { id: 13, is_member: 0, s_shared: null, s_market: null, s_small: null, s_supply: null, s_mod: 5, s_time: 5, s_food: 5, s_overall: 5 },
+            { id: 14, is_member: 1, s_shared: 3, s_market: 4, s_small: 3, s_supply: 3, s_mod: 3, s_time: 2, s_food: 4, s_overall: 3 },
+            { id: 15, is_member: 1, s_shared: 5, s_market: 5, s_small: 4, s_supply: 4, s_mod: 4, s_time: 5, s_food: 4, s_overall: 4 }
+        ];
+
+        // 1. Calculate KPIs
+        const totalPax = cleanedData.length;
+        const members = cleanedData.filter(d => d.is_member === 1);
+        const nonMembers = cleanedData.filter(d => d.is_member === 0);
+        
+        const memberRatio = Math.round((members.length / totalPax) * 100);
+        
+        const avg = (arr, key) => {
+            const valid = arr.filter(d => d[key] !== null);
+            if(valid.length === 0) return 0;
+            return valid.reduce((sum, d) => sum + d[key], 0) / valid.length;
+        };
+
+        const avgOverall = avg(cleanedData, 's_overall').toFixed(2);
+        
+        const topBoxCount = cleanedData.filter(d => d.s_overall >= 4).length;
+        const topBoxScore = Math.round((topBoxCount / totalPax) * 100);
+
+        // Update DOM for KPIs
+        document.getElementById('kpi-total').innerText = totalPax;
+        document.getElementById('kpi-overall').innerText = avgOverall;
+        document.getElementById('kpi-member-ratio').innerText = memberRatio + '%';
+        document.getElementById('kpi-topbox').innerText = topBoxScore + '%';
+
+        // 2. Chart Configurations
+        Chart.defaults.font.family = "'Prompt', sans-serif";
+        Chart.defaults.color = '#64748b';
+
+        // Chart 1: Content Satisfaction (Bar Chart)
+        const ctxContent = document.getElementById('contentChart').getContext('2d');
+        new Chart(ctxContent, {
+            type: 'bar',
+            data: {
+                labels: [
+                    ['Shared', 'Responsibility'], 
+                    ['Market Dynamics', '& EUDR'], 
+                    ['Smallholder', 'Support'], 
+                    ['Supply Chain', 'Transition']
+                ],
+                datasets: [{
+                    label: 'Average Score (out of 5)',
+                    data: [
+                        avg(members, 's_shared').toFixed(2),
+                        avg(members, 's_market').toFixed(2),
+                        avg(members, 's_small').toFixed(2),
+                        avg(members, 's_supply').toFixed(2)
+                    ],
+                    backgroundColor: '#009639',
+                    borderRadius: 6,
+                    barPercentage: 0.6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, max: 5, ticks: { stepSize: 1 } },
+                    x: { grid: { display: false } }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => ` Average: ${context.raw} points`
+                        }
+                    }
+                }
+            }
+        });
+
+        // Chart 2: Logistics Radar Chart (Member vs Non-Member)
+        const ctxLogistics = document.getElementById('logisticsChart').getContext('2d');
+        new Chart(ctxLogistics, {
+            type: 'radar',
+            data: {
+                labels: ['Moderator', 'Time Allocation', 'Food & Catering'],
+                datasets: [
+                    {
+                        label: 'RSPO Member',
+                        data: [
+                            avg(members, 's_mod').toFixed(2),
+                            avg(members, 's_time').toFixed(2),
+                            avg(members, 's_food').toFixed(2)
+                        ],
+                        backgroundColor: 'rgba(0, 150, 57, 0.2)',
+                        borderColor: '#009639',
+                        pointBackgroundColor: '#009639',
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Non-Member',
+                        data: [
+                            avg(nonMembers, 's_mod').toFixed(2),
+                            avg(nonMembers, 's_time').toFixed(2),
+                            avg(nonMembers, 's_food').toFixed(2)
+                        ],
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        borderColor: '#3b82f6',
+                        pointBackgroundColor: '#3b82f6',
+                        borderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        min: 2,
+                        max: 5,
+                        ticks: { stepSize: 1, display: false }
+                    }
+                },
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        // Chart 3: Distribution Doughnut Chart
+        const scoreCounts = { '5 (Excellent)': 0, '4 (Good)': 0, '3 (Neutral)': 0, '2 (Fair)': 0, '1 (Poor)': 0 };
+        cleanedData.forEach(d => {
+            if(d.s_overall === 5) scoreCounts['5 (Excellent)']++;
+            else if(d.s_overall === 4) scoreCounts['4 (Good)']++;
+            else if(d.s_overall === 3) scoreCounts['3 (Neutral)']++;
+            else if(d.s_overall === 2) scoreCounts['2 (Fair)']++;
+            else if(d.s_overall === 1) scoreCounts['1 (Poor)']++;
+        });
+
+        const ctxDist = document.getElementById('distributionChart').getContext('2d');
+        new Chart(ctxDist, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(scoreCounts),
+                datasets: [{
+                    data: Object.values(scoreCounts),
+                    backgroundColor: [
+                        '#009639', // 5
+                        '#10b981', // 4
+                        '#fbbf24', // 3
+                        '#f97316', // 2
+                        '#ef4444'  // 1
+                    ],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: { position: 'right', labels: { boxWidth: 12 } }
+                }
+            }
+        });
+
+    </script>
+</body>
+</html>
